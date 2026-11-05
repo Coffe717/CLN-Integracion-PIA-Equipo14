@@ -1,5 +1,7 @@
 import pytest
-from src.domain import Order, CustomerHasDebt
+
+from src.domain import CustomerHasDebt, Order
+
 
 def test_vip_discount():
     o = Order(100, vip=True)
@@ -25,7 +27,7 @@ def test_vip_discount_200():
     assert o.confirm() == 170
     assert o.status == "CONFIRMED"
 
-def test_regular_no_discount():
+def test_regular_no_discount_200():
     # Arrange: preparar un pedido de 200 con cliente regular
     o = Order(200, vip=False)
     # Act + Assert: no hay descuento, retorna los mismos 200
