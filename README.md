@@ -16,5 +16,5 @@ Asegúrate de tener instalado **Docker** y **Docker Desktop** abiertos en tu com
 
 1. **Clonar el repositorio:**
    ```bash
-   git clone <URL-DE-TU-REPOSITORIO>
+   git clone https://github.com/Coffe717/CLN-Integracion-PIA-Equipo14.git 
    cd CLN-Integracion-PIA-Equipo14
