@@ -1,0 +1,38 @@
+# DB + App + Tests  ·  Uso:  cp .env.example .env && docker compose up --build
+#                        Pruebas:  docker compose run --rm tests
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cargobox}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cambia-esta-clave}
+      POSTGRES_DB: ${POSTGRES_DB:-cargobox}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cargobox}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db: {condition: service_healthy}
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cargobox}:${POSTGRES_PASSWORD:-cambia-esta-clave}@db:5432/${POSTGRES_DB:-cargobox}
+      SEED_DEMO: ${SEED_DEMO:-true}
+      UMBRAL_HORAS: ${UMBRAL_HORAS:-24}
+      PORT: 8000
+    ports: ["8000:8000"]
+
+  tests:
+    build: .
+    profiles: ["tests"]
+    depends_on:
+      db: {condition: service_healthy}
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cargobox}:${POSTGRES_PASSWORD:-cambia-esta-clave}@db:5432/${POSTGRES_DB:-cargobox}
+    command: ["pytest", "-q"]
+
+volumes:
+  pgdata:
