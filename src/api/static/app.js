@@ -225,15 +225,25 @@ function dialogoEntrega(guia) {
       return r !== undefined;
     });
   prepararFirma($("#firma"));
-  $("#dlg-limpiar").onclick = () => { const l = $("#firma"); l.getContext("2d").clearRect(0, 0, l.width, l.height); delete l.dataset.firmado; };
+    $("#dlg-limpiar").onclick = () => { const l = $("#firma"); l.getContext("2d").clearRect(0, 0, l.width, l.height); l.trazo = 0; delete l.dataset.firmado; };
 }
 function leerArchivo(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); }); }
 function prepararFirma(c) {
   const x = c.getContext("2d"); x.lineWidth = 2.5; x.lineCap = "round"; x.strokeStyle = "#111";
-  let dibujando = false;
+  // Solo cuenta como firma un trazo real (>= 60 px dibujados); un clic o un punto suelto no basta.
+  const MIN_TRAZO = 60;
+  let dibujando = false, ultimo = null;
+  c.trazo = 0;
   const pos = (e) => { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) * c.width / r.width, (e.clientY - r.top) * c.height / r.height]; };
-  c.onpointerdown = (e) => { dibujando = true; c.setPointerCapture(e.pointerId); x.beginPath(); x.moveTo(...pos(e)); };
-  c.onpointermove = (e) => { if (!dibujando) return; x.lineTo(...pos(e)); x.stroke(); c.dataset.firmado = "1"; };
+  c.onpointerdown = (e) => { dibujando = true; c.setPointerCapture(e.pointerId); ultimo = pos(e); x.beginPath(); x.moveTo(...ultimo); };
+  c.onpointermove = (e) => {
+    if (!dibujando) return;
+    const p = pos(e);
+    c.trazo += Math.hypot(p[0] - ultimo[0], p[1] - ultimo[1]);
+    ultimo = p;
+    x.lineTo(...p); x.stroke();
+    if (c.trazo >= MIN_TRAZO) c.dataset.firmado = "1";
+  };
   c.onpointerup = () => { dibujando = false; };
 }
 
