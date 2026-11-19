@@ -4,8 +4,8 @@ PIA · Componentes de Lógica de Negocios · UANL-FIME · Equipo 14 (Grupo 002)
 Aplicación web para registrar paquetes, seguirlos en tiempo real y cerrar la entrega con evidencia.
 Implementa **DDD + Specification + State Machine + API REST (OpenAPI)** a partir del BRD, historias de usuario, BPMN y glosario del equipo.
 
-- **Repositorio:** _(pega aquí la URL de GitHub)_
-- **Sistema desplegado:** _(pega aquí la URL de Render/Railway; Swagger en `/docs`)_
+- **Repositorio:** https://github.com/Coffe717/CLN-Integracion-PIA-Equipo14
+- **Sistema desplegado:** https://cln-integracion-pia-equipo14.onrender.com  ·  Swagger: https://cln-integracion-pia-equipo14.onrender.com/docs
 
 ## Qué puede hacer cada persona (pestañas de la interfaz)
 | Pestaña | Para qué |
