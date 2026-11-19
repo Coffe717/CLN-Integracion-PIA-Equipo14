@@ -1,0 +1,1624 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "CargoBox API",
+    "version": "1.0.0",
+    "description": "API de gestión y rastreo de envíos CargoBox (PIA - Componentes de Lógica de Negocio). Contrato: 200/201 éxito · 400 solicitud inválida · 403 rol no permitido · 404 no existe · 409 conflicto de estado o regla · 422 validación."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "Sistema"
+        ],
+        "summary": "Estado del servicio",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          }
+        }
+      }
+    },
+    "/api/v1/remitentes": {
+      "get": {
+        "tags": [
+          "Catálogos"
+        ],
+        "summary": "Lista de remitentes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          }
+        }
+      }
+    },
+    "/api/v1/cotizaciones": {
+      "post": {
+        "tags": [
+          "Sucursal"
+        ],
+        "summary": "Cotizar un envío (BR005, historias 1 y 15)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "400": {
+            "description": "Solicitud mal formada o faltan campos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Dato inválido o regla de validación (p. ej. evidencia obligatoria)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "peso_kg": {
+                    "type": "number"
+                  },
+                  "largo_cm": {
+                    "type": "number"
+                  },
+                  "ancho_cm": {
+                    "type": "number"
+                  },
+                  "alto_cm": {
+                    "type": "number"
+                  },
+                  "destino_ciudad": {
+                    "type": "string"
+                  },
+                  "nivel_servicio": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "peso_kg",
+                  "largo_cm",
+                  "ancho_cm",
+                  "alto_cm",
+                  "destino_ciudad",
+                  "nivel_servicio"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes": {
+      "post": {
+        "tags": [
+          "Sucursal"
+        ],
+        "summary": "Registrar la recepción y generar guía única (BR006, BR007)",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Operación exitosa"
+          },
+          "400": {
+            "description": "Solicitud mal formada o faltan campos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Dato inválido o regla de validación (p. ej. evidencia obligatoria)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remitente_id": {
+                    "type": "string"
+                  },
+                  "destinatario_nombre": {
+                    "type": "string"
+                  },
+                  "destinatario_telefono": {
+                    "type": "string"
+                  },
+                  "origen_calle": {
+                    "type": "string"
+                  },
+                  "origen_ciudad": {
+                    "type": "string"
+                  },
+                  "destino_calle": {
+                    "type": "string"
+                  },
+                  "destino_ciudad": {
+                    "type": "string"
+                  },
+                  "peso_kg": {
+                    "type": "number"
+                  },
+                  "largo_cm": {
+                    "type": "number"
+                  },
+                  "ancho_cm": {
+                    "type": "number"
+                  },
+                  "alto_cm": {
+                    "type": "number"
+                  },
+                  "nivel_servicio": {
+                    "type": "string"
+                  },
+                  "contenido": {
+                    "type": "string"
+                  },
+                  "empleado": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "remitente_id",
+                  "destinatario_nombre",
+                  "destino_calle",
+                  "destino_ciudad",
+                  "peso_kg",
+                  "largo_cm",
+                  "ancho_cm",
+                  "alto_cm",
+                  "nivel_servicio"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Rastreo"
+        ],
+        "summary": "Listar paquetes (filtros: estado, remitente_id)",
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "remitente_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}": {
+      "get": {
+        "tags": [
+          "Rastreo"
+        ],
+        "summary": "Detalle y línea de tiempo de una guía (BR001)",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/rastreo": {
+      "get": {
+        "tags": [
+          "Rastreo"
+        ],
+        "summary": "Línea de tiempo completa con incidencias y evidencia",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/evidencia": {
+      "get": {
+        "tags": [
+          "Auditoría"
+        ],
+        "summary": "Evidencia de entrega con firma y foto (BR004)",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/clasificar": {
+      "post": {
+        "tags": [
+          "Centro de distribución"
+        ],
+        "summary": "Clasificar el paquete (BR008)",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "400": {
+            "description": "Solicitud mal formada o faltan campos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instalacion": {
+                    "type": "string"
+                  },
+                  "operador": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "instalacion"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/arribo": {
+      "post": {
+        "tags": [
+          "Centro de distribución"
+        ],
+        "summary": "Registrar arribo a centro destino (BR010)",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "400": {
+            "description": "Solicitud mal formada o faltan campos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instalacion": {
+                    "type": "string"
+                  },
+                  "operador": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "instalacion"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manifiestos": {
+      "post": {
+        "tags": [
+          "Centro de distribución"
+        ],
+        "summary": "Crear y despachar un manifiesto de viaje (BR009)",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Operación exitosa"
+          },
+          "400": {
+            "description": "Solicitud mal formada o faltan campos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Dato inválido o regla de validación (p. ej. evidencia obligatoria)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "origen": {
+                    "type": "string"
+                  },
+                  "destino": {
+                    "type": "string"
+                  },
+                  "guias": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "operador": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "origen",
+                  "destino",
+                  "guias"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/manifiestos/{manifiesto_id}/arribo": {
+      "post": {
+        "tags": [
+          "Centro de distribución"
+        ],
+        "summary": "Registrar el arribo de todo un manifiesto (BR010)",
+        "parameters": [
+          {
+            "name": "manifiesto_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "400": {
+            "description": "Solicitud mal formada o faltan campos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instalacion": {
+                    "type": "string"
+                  },
+                  "operador": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "instalacion"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rutas": {
+      "post": {
+        "tags": [
+          "Reparto"
+        ],
+        "summary": "Iniciar la ruta del repartidor: paquetes En reparto (BR011)",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Operación exitosa"
+          },
+          "400": {
+            "description": "Solicitud mal formada o faltan campos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Dato inválido o regla de validación (p. ej. evidencia obligatoria)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "repartidor": {
+                    "type": "string"
+                  },
+                  "guias": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "repartidor",
+                  "guias"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/entrega": {
+      "post": {
+        "tags": [
+          "Reparto"
+        ],
+        "summary": "Finalizar entrega con evidencia obligatoria (BR012)",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Dato inválido o regla de validación (p. ej. evidencia obligatoria)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "receptor": {
+                    "type": "string"
+                  },
+                  "firma": {
+                    "type": "string"
+                  },
+                  "foto": {
+                    "type": "string"
+                  },
+                  "repartidor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/ausencia": {
+      "post": {
+        "tags": [
+          "Reparto"
+        ],
+        "summary": "Destinatario ausente: 2.º intento automático (BR014)",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "repartidor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/autorizar-reintento": {
+      "post": {
+        "tags": [
+          "Atención al cliente"
+        ],
+        "summary": "Autorizar el tercer intento (supervisor / atención) (BR014)",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "400": {
+            "description": "Solicitud mal formada o faltan campos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Rol no permitido para la acción",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "autorizador": {
+                    "type": "string"
+                  },
+                  "rol": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "autorizador",
+                  "rol"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/rechazo": {
+      "post": {
+        "tags": [
+          "Reparto"
+        ],
+        "summary": "Registrar rechazo y devolver a origen",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Dato inválido o regla de validación (p. ej. evidencia obligatoria)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "motivo": {
+                    "type": "string"
+                  },
+                  "repartidor": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "motivo"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/devolucion": {
+      "post": {
+        "tags": [
+          "Sucursal"
+        ],
+        "summary": "Confirmar devolución a la sucursal de origen",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "empleado": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/cancelar": {
+      "post": {
+        "tags": [
+          "Sucursal"
+        ],
+        "summary": "Cancelar un envío recién recibido",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "motivo": {
+                    "type": "string"
+                  },
+                  "actor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/reanudar": {
+      "post": {
+        "tags": [
+          "Reparto"
+        ],
+        "summary": "Reintentar la entrega tras una pausa o autorización",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "repartidor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/direccion-incorrecta": {
+      "post": {
+        "tags": [
+          "Reparto"
+        ],
+        "summary": "Excepción: dirección incorrecta (BR013)",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación exitosa"
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "repartidor": {
+                    "type": "string"
+                  },
+                  "comentario": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paquetes/{guia}/incidencia-mayor": {
+      "post": {
+        "tags": [
+          "Reparto"
+        ],
+        "summary": "Escalar daño o pérdida (BR003)",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Operación exitosa"
+          },
+          "400": {
+            "description": "Solicitud mal formada o faltan campos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Dato inválido o regla de validación (p. ej. evidencia obligatoria)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tipo": {
+                    "type": "string"
+                  },
+                  "descripcion": {
+                    "type": "string"
+                  },
+                  "repartidor": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "tipo"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/incidencias": {
+      "get": {
+        "tags": [
+          "Atención al cliente"
+        ],
+        "summary": "Bandeja de incidencias (filtros: estado, guia)",
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "guia",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          }
+        }
+      }
+    },
+    "/api/v1/incidencias/{incidencia_id}/resolver": {
+      "post": {
+        "tags": [
+          "Atención al cliente"
+        ],
+        "summary": "Resolver una incidencia (solo Atención al cliente) (BR003)",
+        "parameters": [
+          {
+            "name": "incidencia_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "400": {
+            "description": "Solicitud mal formada o faltan campos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Rol no permitido para la acción",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso (guía, incidencia, manifiesto...)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: transición de estado inválida o regla de negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Dato inválido o regla de validación (p. ej. evidencia obligatoria)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "agente": {
+                    "type": "string"
+                  },
+                  "rol": {
+                    "type": "string"
+                  },
+                  "resolucion": {
+                    "type": "string"
+                  },
+                  "nueva_calle": {
+                    "type": "string"
+                  },
+                  "nueva_ciudad": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "agente",
+                  "rol",
+                  "resolucion"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alertas": {
+      "get": {
+        "tags": [
+          "Supervisor"
+        ],
+        "summary": "Paquetes estancados (BR002), parámetro umbral_horas",
+        "parameters": [
+          {
+            "name": "umbral_horas",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "422": {
+            "description": "Dato inválido o regla de validación (p. ej. evidencia obligatoria)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alertas/ejecutar": {
+      "post": {
+        "tags": [
+          "Supervisor"
+        ],
+        "summary": "Ejecutar el monitoreo y avisar al supervisor",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          },
+          "422": {
+            "description": "Dato inválido o regla de validación (p. ej. evidencia obligatoria)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "umbral_horas": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/notificaciones": {
+      "get": {
+        "tags": [
+          "Supervisor"
+        ],
+        "summary": "Avisos para Atención al cliente / Supervisor",
+        "parameters": [
+          {
+            "name": "destino",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "codigo": {
+                "type": "string",
+                "example": "EVIDENCIA_OBLIGATORIA"
+              },
+              "mensaje": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

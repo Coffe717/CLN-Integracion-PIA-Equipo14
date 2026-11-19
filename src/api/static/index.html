@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CargoBox · Envíos y rastreo</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">📦</span><div><strong>CargoBox</strong><small>Envíos fáciles de seguir</small></div></div>
+  <nav id="nav" aria-label="Secciones">
+    <button data-tab="rastreo" class="on">🔎 Rastrear mi paquete</button>
+    <button data-tab="sucursal">🏪 Sucursal</button>
+    <button data-tab="centro">🏭 Centro de distribución</button>
+    <button data-tab="reparto">🚚 Repartidor</button>
+    <button data-tab="atencion">🎧 Atención al cliente</button>
+    <button data-tab="supervisor">📊 Supervisor</button>
+    <button data-tab="auditoria">🧾 Auditoría</button>
+  </nav>
+  <a class="docs" href="/docs" target="_blank" rel="noopener">API / Swagger</a>
+</header>
+
+<main>
+  <!-- RASTREO -->
+  <section id="tab-rastreo" class="tab on">
+    <div class="hero card">
+      <h1>¿Dónde está mi paquete?</h1>
+      <p>Escribe tu número de guía (empieza con <b>CB-</b>) y mira su recorrido al instante.</p>
+      <form id="form-rastreo" class="inline">
+        <input id="guia-buscar" placeholder="Ej. CB-1A2B3C4D5E" autocomplete="off" aria-label="Número de guía">
+        <button class="primary">Rastrear</button>
+      </form>
+    </div>
+    <div id="resultado-rastreo"></div>
+  </section>
+
+  <!-- SUCURSAL -->
+  <section id="tab-sucursal" class="tab">
+    <p class="hint">Aquí recibes paquetes: llena los datos, calcula el precio y genera la guía. El precio lo calcula el sistema; no se puede cambiar a mano.</p>
+    <div class="grid2">
+      <div class="card">
+        <h2>1 · Datos del envío</h2>
+        <form id="form-envio" class="form">
+          <label>Remitente (quien envía)<select id="e-remitente" required></select></label>
+          <label>Nombre de quien recibe<input id="e-dest" required></label>
+          <label>Teléfono de quien recibe (opcional)<input id="e-tel" inputmode="tel"></label>
+          <label>Calle y número de entrega<input id="e-calle" required></label>
+          <label>Ciudad de entrega<input id="e-ciudad" required placeholder="Ej. Monterrey, Saltillo, Guadalajara"></label>
+          <div class="row3">
+            <label>Peso (kg)<input id="e-peso" type="number" step="0.1" min="0" required></label>
+            <label>Largo (cm)<input id="e-largo" type="number" step="1" min="0" required></label>
+            <label>Ancho (cm)<input id="e-ancho" type="number" step="1" min="0" required></label>
+            <label>Alto (cm)<input id="e-alto" type="number" step="1" min="0" required></label>
+          </div>
+          <label>Tipo de servicio
+            <select id="e-nivel"><option value="ESTANDAR">Estándar (más económico)</option><option value="EXPRES">Exprés (más rápido)</option></select>
+          </label>
+          <label>¿Qué contiene? (opcional)<input id="e-contenido"></label>
+          <label>Empleado que recibe<input id="e-empleado" placeholder="Tu nombre"></label>
+          <h2>2 · Precio</h2>
+          <button type="button" id="btn-cotizar" class="secondary">Calcular precio</button>
+          <div id="cotizacion" class="quote" hidden></div>
+          <h2>3 · Confirmar</h2>
+          <button id="btn-registrar" class="primary" disabled>Confirmar recepción y generar guía</button>
+        </form>
+        <div id="guia-generada"></div>
+      </div>
+      <div class="card"><h2>Envíos recientes</h2><div id="lista-sucursal" class="table-wrap"></div></div>
+    </div>
+  </section>
+
+  <!-- CENTRO -->
+  <section id="tab-centro" class="tab">
+    <p class="hint">Marca los paquetes y pulsa el botón del paso que corresponde: clasificar → despachar viaje → registrar llegada.</p>
+    <div class="card"><h2>1 · Por clasificar</h2><div id="lista-clasificar" class="table-wrap"></div>
+      <div class="actions"><label>Instalación<select class="inst" id="c-inst1"></select></label>
+      <button class="primary" id="btn-clasificar">Clasificar seleccionados</button></div></div>
+    <div class="card"><h2>2 · Listos para viaje</h2><div id="lista-viaje" class="table-wrap"></div>
+      <div class="actions"><label>Sale de<select class="inst" id="c-origen"></select></label>
+      <label>Va a<select class="inst" id="c-destino"></select></label>
+      <button class="primary" id="btn-despachar">Despachar viaje</button></div></div>
+    <div class="card"><h2>3 · En tránsito (registrar llegada)</h2><div id="lista-transito" class="table-wrap"></div>
+      <div class="actions"><label>Llegada a<select class="inst" id="c-llegada"></select></label>
+      <button class="primary" id="btn-llegada">Registrar llegada</button></div></div>
+  </section>
+
+  <!-- REPARTO -->
+  <section id="tab-reparto" class="tab">
+    <p class="hint">Carga tus paquetes para iniciar la ruta. En cada entrega elige qué pasó. Para entregar necesitas firma o foto de quien recibe.</p>
+    <div class="card"><label class="inline-label">Tu nombre de repartidor<input id="r-nombre" placeholder="Ej. Juan Pérez"></label></div>
+    <div class="card"><h2>Por cargar en mi unidad</h2><div id="lista-cargar" class="table-wrap"></div>
+      <div class="actions"><button class="primary" id="btn-ruta">Iniciar ruta con los seleccionados</button></div></div>
+    <div class="card"><h2>En reparto ahora</h2><div id="lista-reparto" class="table-wrap"></div></div>
+  </section>
+
+  <!-- ATENCION -->
+  <section id="tab-atencion" class="tab">
+    <p class="hint">Resuelve los tickets que llegan de la calle y autoriza terceros intentos cuando corresponda.</p>
+    <div class="card"><h2>Tickets abiertos</h2><div id="lista-incidencias" class="table-wrap"></div></div>
+    <div class="card"><h2>Paquetes que piden autorización</h2><div id="lista-autorizar-atn" class="table-wrap"></div></div>
+    <div class="card"><h2>Avisos recientes</h2><div id="avisos-atn"></div></div>
+  </section>
+
+  <!-- SUPERVISOR -->
+  <section id="tab-supervisor" class="tab">
+    <p class="hint">Detecta paquetes detenidos y autoriza reintentos excepcionales.</p>
+    <div class="card"><h2>Paquetes sin movimiento</h2>
+      <div class="actions"><label>Más de (horas)<input id="s-umbral" type="number" min="0" value="24"></label>
+        <button class="primary" id="btn-alertas">Buscar</button>
+        <button class="secondary" id="btn-avisar">Buscar y avisar al supervisor</button></div>
+      <div id="lista-alertas" class="table-wrap"></div></div>
+    <div class="card"><h2>Paquetes que piden autorización</h2><div id="lista-autorizar-sup" class="table-wrap"></div></div>
+    <div class="card"><h2>Avisos recientes</h2><div id="avisos-sup"></div></div>
+  </section>
+
+  <!-- AUDITORIA -->
+  <section id="tab-auditoria" class="tab">
+    <p class="hint">Consulta las entregas concluidas y su evidencia (firma, foto, fecha y hora).</p>
+    <div class="card"><h2>Entregas con evidencia</h2><div id="lista-entregados" class="table-wrap"></div></div>
+  </section>
+</main>
+
+<dialog id="dlg"><form method="dialog" id="dlg-form"><div id="dlg-body"></div></form></dialog>
+<div id="toasts" aria-live="polite"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
